@@ -1,12 +1,12 @@
-#include "keyframe.h"
+#include "frame.h"
 #include "map.h"
 
-KeyFrame::KeyFrame()
+Frame::Frame()
 {
 
 }
 
-KeyFrame::KeyFrame(unsigned int id, Eigen::Matrix<float,4,4> Tcw, float ts, Eigen::Matrix<float,3,3> K, unsigned int h, unsigned int w):
+Frame::Frame(unsigned int id, Eigen::Matrix<float,4,4> Tcw, float ts, Eigen::Matrix<float,3,3> K, unsigned int h, unsigned int w):
     mTcw(Tcw), mTs(ts), mK(K), mId(id), heigh(h), width(w)
 {
     mpMap = static_cast<Map*>(NULL);
@@ -18,7 +18,7 @@ KeyFrame::KeyFrame(unsigned int id, Eigen::Matrix<float,4,4> Tcw, float ts, Eige
     cy = mK(1,2);
 }
 
-KeyFrame::KeyFrame(Eigen::Matrix<float,6,1> mean, float stdAng, float stdTrans, unsigned int id, float ts, Eigen::Matrix<float,3,3> K, unsigned int h, unsigned int w):
+Frame::Frame(Eigen::Matrix<float,6,1> mean, float stdAng, float stdTrans, unsigned int id, float ts, Eigen::Matrix<float,3,3> K, unsigned int h, unsigned int w):
     mK(K), mTs(ts), mId(id), heigh(h), width(w)
 {
     Eigen::Vector3f phi(0.1f+stdAng*(static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f),
@@ -39,7 +39,8 @@ KeyFrame::KeyFrame(Eigen::Matrix<float,6,1> mean, float stdAng, float stdTrans, 
     cy = mK(1,2);
 }
 
-void KeyFrame::ProjectMap(Map *map)
+
+void Frame::ProjectMap(Map *map)
 {
     // Project map points and search coincidences
 
@@ -49,7 +50,11 @@ void KeyFrame::ProjectMap(Map *map)
     Eigen::Vector2f u_obs; // Observation
     bool bCoincidence;
 
-    for(std::vector<Point*>::iterator itP = map->mvpPoints.begin(); itP != map->mvpPoints.end(); itP++)
+    std::vector<Point*> vpPoints;
+    vpPoints.reserve(map->GetNumberPoints());
+    vpPoints = map->GetPoints();
+
+    for(std::vector<Point*>::iterator itP = vpPoints.begin(); itP != vpPoints.end(); itP++)
     {
         cr = mTcw.topLeftCorner(3,3)*(*itP)->mr + mTcw.topRightCorner(3,1);
         hu = mK*cr;
@@ -75,4 +80,25 @@ void KeyFrame::ProjectMap(Map *map)
             (*itP)->mmpKFObs[this] = u_obs;
         }
     }
+}
+
+void Frame::SetMap(Map *map)
+{
+    mpMap = map;
+}
+
+void Frame::SetLocalMap(Map *map)
+{
+    mpLocalMap = map;
+}
+
+void Frame::SetPose(Eigen::Matrix<float,4,4> Tcw)
+{
+    // TODO MutexPose
+    mTcw = Tcw;
+}
+
+Eigen::Matrix<float,4,4> Frame::GetPose()
+{
+    return mTcw;
 }

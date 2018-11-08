@@ -5,11 +5,25 @@
 #include<iostream>
 #include <vector>
 
-#include "Point.h"
-#include "keyframe.h"
+#include "point.h"
+#include "frame.h"
 #include "map.h"
 #include "optimization.h"
 #include "maths.h"
+
+
+
+
+
+/*int main(int argc, char *argv[])
+{
+    std::cout << "Feature SLAM" << std::endl;
+
+    return 0;
+}*/
+
+
+
 
 int main(int argc, char *argv[])
 {
@@ -47,28 +61,29 @@ int main(int argc, char *argv[])
     float stdAngCam = 0.7f;
     float stdTransCam = 2.0f;
 
-    std::vector<KeyFrame*> vpKFs(NKF);
+    std::vector<Frame*> vpKFs(NKF);
     float ts = 0.0f;
     id = 0;
-    for(std::vector<KeyFrame*>::iterator itCam = vpKFs.begin(); itCam != vpKFs.end(); itCam++)
+    for(std::vector<Frame*>::iterator itCam = vpKFs.begin(); itCam != vpKFs.end(); itCam++)
     {
-        (*itCam) = new  KeyFrame(meanCamera, stdAngCam, stdTransCam, ts, id++, K, heigh, width);
+        (*itCam) = new  Frame(meanCamera, stdAngCam, stdTransCam, ts, id++, K, heigh, width);
         ts += 1.0f;
     }
 
 
     // 2. Create Map and add observations
     pMap = new Map(vpPoints, vpKFs);
-    for(std::vector<KeyFrame*>::iterator itKF = pMap->mvpKFs.begin(); itKF != pMap->mvpKFs.end(); itKF++)
+    vpKFs = pMap->GetKFs();
+    for(std::vector<Frame*>::iterator itKF = vpKFs.begin(); itKF != vpKFs.end(); itKF++)
     {
         (*itKF)->ProjectMap(pMap);
     }
 
-    for(unsigned int i = 0; i < pMap->mvpKFs.size(); i++)
+    for(unsigned int i = 0; i < vpKFs.size(); i++)
     {
         if (i==0)
             continue;
-        Eigen::Matrix4f auxMat = pMap->mvpKFs[i]->mTcw*Maths::InvSE3(pMap->mvpKFs[i-1]->mTcw);
+        Eigen::Matrix4f auxMat = vpKFs[i]->GetPose()*Maths::InvSE3(vpKFs[i-1]->GetPose());
         std::cout << " T_{i,i-1} " << std::endl << auxMat << std::endl;
         std::cout << "D_t = " << sqrt(auxMat(0,3)*auxMat(0,3)+auxMat(1,3)*auxMat(1,3)+auxMat(2,3)*auxMat(2,3)) << std::endl;
     }
@@ -76,11 +91,12 @@ int main(int argc, char *argv[])
     // 3. Perform BA
     Optimization::visualBA(pMap);
 
-    for(unsigned int i = 0; i < pMap->mvpKFs.size(); i++)
+    vpKFs = pMap->GetKFs();
+    for(unsigned int i = 0; i < vpKFs.size(); i++)
     {
         if (i==0)
             continue;
-        Eigen::Matrix4f auxMat = pMap->mvpKFs[i]->mTcw*Maths::InvSE3(pMap->mvpKFs[i-1]->mTcw);
+        Eigen::Matrix4f auxMat = vpKFs[i]->GetPose()*Maths::InvSE3(vpKFs[i-1]->GetPose());
         std::cout << " T_{i,i-1} " << std::endl << auxMat << std::endl;
         std::cout << "D_t = " << sqrt(auxMat(0,3)*auxMat(0,3)+auxMat(1,3)*auxMat(1,3)+auxMat(2,3)*auxMat(2,3)) << std::endl;
 

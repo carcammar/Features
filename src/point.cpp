@@ -1,4 +1,4 @@
-#include "Point.h"
+#include "point.h"
 
 Point::Point()
 {
@@ -18,4 +18,20 @@ Point::Point(unsigned int id, Eigen::Vector3f mean, float std): mId(id)
     mpLocalMap = static_cast<Map*>(NULL);
 
     sigma = 1.0; // pixels TODO CHANGE
+}
+
+void Point::SetMap(Map *map)
+{
+    mpMap = map;
+}
+
+void Point::SetLocalMap(Map *map)
+{
+    mpLocalMap = map;
+}
+
+void Point::SetPosition(Eigen::Vector3f pos)
+{
+    // TODO PositionMutex
+    mr = pos;
 }

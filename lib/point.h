@@ -5,7 +5,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <map>
-#include <lib/keyframe.h>
+#include <frame.h>
 
 class Map;
 
@@ -13,16 +13,26 @@ class Point
 {
 public:
     Eigen::Vector3f mr; // Global cordinates
-    std::map<KeyFrame*, Eigen::Vector2f> mmpKFObs; // map from pointer to KeyFrames to Observations
+    std::map<Frame*, Eigen::Vector2f> mmpKFObs; // map from pointer to Frames to Observations
     Point();
     Point(unsigned int id, Eigen::Vector3f mean, float std);
 
     unsigned int mId;
 
+    double sigma; // Related with scale of extracted point
+
+    void SetMap(Map *map);
+    void SetLocalMap(Map *map);
+
+    void SetPosition(Eigen::Vector3f pos);
+
+private:
+
+    // TODO declare mr as private
+
+    // Map information
     Map *mpMap;
     Map *mpLocalMap;
-
-    double sigma; // Related with scale of extracted point
 };
 
 #endif // POINT_H

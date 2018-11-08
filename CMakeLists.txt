@@ -26,7 +26,6 @@ find_package(OpenCV 3.0 QUIET)
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Ceres QUIET)
 
-
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/lib
@@ -36,20 +35,23 @@ ${CERES_INCLUDE_DIRS}
 
 set(SOURCES
     main.cpp
-    src/keyframe.cpp
+    src/frame.cpp
     src/maths.cpp
     src/map.cpp
-    src/Point.cpp
+    src/point.cpp
     src/cerestypes.cpp
-    src/optimization.cpp)
+    src/optimization.cpp
+    src/slam.cpp)
 
 set(HEADERS
-    lib/Point.h
+    lib/point.h
     lib/maths.h
     lib/map.h
-    lib/keyframe.h
+    lib/frame.h
     lib/cerestypes.h
-    lib/optimization.h)
+    lib/optimization.h
+    lib/slam.h)
+
 
 add_executable(${PROJECT_NAME}
     ${SOURCES}
@@ -60,3 +62,4 @@ ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
 ${CERES_LIBRARIES}
 )
+
