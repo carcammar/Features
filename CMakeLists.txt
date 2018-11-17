@@ -8,9 +8,16 @@ set(CMAKE_AUTOMOC ON)
 
 # Check c++11 (Required at least for ceres)
 include(CheckCXXCompilerFlag)
+
+CHECK_CXX_COMPILER_FLAG("-std=c++17" COMPILER_SUPPORTS_CXX17)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
+
+if(COMPILER_SUPPORTS_CXX17)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+   add_definitions(-DCOMPILEDWITHC17)
+   message(STATUS "Using flag -std=c++17.")
+elseif(COMPILER_SUPPORTS_CXX11)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
    add_definitions(-DCOMPILEDWITHC11)
    message(STATUS "Using flag -std=c++11.")
@@ -22,15 +29,18 @@ else()
    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+
 find_package(OpenCV 3.0 QUIET)
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(Ceres QUIET)
+find_package(Pangolin REQUIRED)
 
 include_directories(
 ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/lib
 ${EIGEN3_INCLUDE_DIR}
 ${CERES_INCLUDE_DIRS}
+${Pangolin_INCLUDE_DIRS}
 )
 
 set(SOURCES
@@ -41,7 +51,9 @@ set(SOURCES
     src/point.cpp
     src/cerestypes.cpp
     src/optimization.cpp
-    src/slam.cpp)
+    src/slam.cpp
+    src/displayer.cpp
+    src/keyframe.cpp)
 
 set(HEADERS
     lib/point.h
@@ -50,16 +62,20 @@ set(HEADERS
     lib/frame.h
     lib/cerestypes.h
     lib/optimization.h
-    lib/slam.h)
+    lib/slam.h
+    lib/displayer.h
+    lib/keyframe.h)
 
 
 add_executable(${PROJECT_NAME}
     ${SOURCES}
     ${HEADERS})
 
+
 target_link_libraries(${PROJECT_NAME}
 ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
 ${CERES_LIBRARIES}
+${Pangolin_LIBRARIES}
 )
 

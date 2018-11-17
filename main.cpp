@@ -5,6 +5,7 @@
 #include<iostream>
 #include <vector>
 
+#include "slam.h"
 #include "point.h"
 #include "frame.h"
 #include "map.h"
@@ -15,17 +16,18 @@
 
 
 
-/*int main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
     std::cout << "Feature SLAM" << std::endl;
-
+    SLAM slamSystem("/home/carlos/Desktop/sequences/test2/", "/home/carlos/Desktop/sequences/test2/euroc.yaml");
+    slamSystem.Run();
     return 0;
-}*/
+}
 
 
 
 
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
 
 
@@ -103,4 +105,4 @@ int main(int argc, char *argv[])
     }
 
     return 0;
-}
+}*/

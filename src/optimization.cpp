@@ -22,13 +22,15 @@ bool Optimization::visualBA(Map* pMap)
     Eigen::Vector3f r;
     Eigen::Matrix<float,4,4> Tcw;
 
-    std::map<Frame*,Eigen::Vector2f>::iterator itMap;
+    std::map<KeyFrame*,Eigen::Vector2f>::iterator itMap;
+    Eigen::Vector2f pt;
+    bool bGood;
 
     double *params; //optimization parameters
     std::vector<Point*> vpPoints;
     vpPoints.reserve(nPoints);
     vpPoints = pMap->GetPoints();
-    std::vector<Frame*> vpKFs;
+    std::vector<KeyFrame*> vpKFs;
     vpKFs.reserve(nKFs);
     vpKFs = pMap->GetKFs();
 
@@ -54,7 +56,7 @@ bool Optimization::visualBA(Map* pMap)
     {
         Point *point = vpPoints[i];
         params = new double[3]; // (r)
-        r = point->mr;
+        r = point->GetPosition();
         params[0] = static_cast <double>(r(0));
         params[1] = static_cast <double>(r(1));
         params[2] = static_cast <double>(r(2));
@@ -64,12 +66,12 @@ bool Optimization::visualBA(Map* pMap)
         // 0.2 Add observations
         for(unsigned int j = 0; j < vpKFs.size(); j++)
         {
-            Frame *kf = vpKFs[j];
-            itMap = point->mmpKFObs.find(kf);
-            if (itMap == point->mmpKFObs.end())
+            KeyFrame *kf = vpKFs[j];
+            bGood = point->GetObservation(kf, pt);
+            if (!bGood)
                 continue;
             // std::cout << "Obs KF: " << kf->mId << std::endl;
-            ceres::CostFunction* cost_function = cerestypes::ReprojectionError::Create(itMap->second, point, itMap->first);
+            ceres::CostFunction* cost_function = cerestypes::ReprojectionError::Create(pt, point, kf);
             // TODO Add Hubber robust kernel
             problem.AddResidualBlock(cost_function, NULL, vCamParam[j], vPointParam[i]);
             // TODO check that point to be added has at least two observations in added frames
@@ -89,7 +91,7 @@ bool Optimization::visualBA(Map* pMap)
 
     // 2. Get optimized results
     // 2.1 KFs
-    Frame *pKF;
+    KeyFrame *pKF;
     for(unsigned int i = 0; i < vCamParam.size(); i++)
     {
         if (!vCamParam[i]) // Check camera has been included into optimization

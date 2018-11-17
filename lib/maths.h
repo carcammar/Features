@@ -2,6 +2,7 @@
 #define MATHS_H
 
 #include <Eigen/Dense>
+#include <opencv2/opencv.hpp>
 #include <cmath>
 
 class Maths
@@ -18,6 +19,9 @@ public:
     static Eigen::Matrix<float,4,4> ExpSE3(Eigen::Vector3f phi);
     static Eigen::Matrix<float,6,1> LogSE3(Eigen::Matrix<float,4,4> T);
     static Eigen::Matrix<float,4,4> InvSE3(Eigen::Matrix<float,4,4> T);
+
+    static Eigen::MatrixXf Cvmat2Eigmat(cv::Mat cvM);
+    static cv::Mat Eigmat2Cvmat(Eigen::MatrixXf eigM);
 };
 
 #endif // MATHS_H

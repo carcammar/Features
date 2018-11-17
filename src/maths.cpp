@@ -79,3 +79,41 @@ Eigen::Matrix<float,4,4> Maths::InvSE3(Eigen::Matrix<float,4,4> T)
     mat(3,3) = 1.0f;
     return mat;
 }
+
+Eigen::MatrixXf Maths::Cvmat2Eigmat(cv::Mat cvM)
+{
+    Eigen::MatrixXf eigM;
+    eigM = Eigen::MatrixXf::Zero(cvM.rows, cvM.cols);
+    switch(cvM.type())
+    {
+        case CV_8U:
+            for(int i=0; i<eigM.rows(); i++)
+                for(int j=0; j<eigM.cols(); j++)
+                    eigM(i,j) = cvM.at<uchar>(i,j);
+            break;
+        case CV_32F:
+            for(int i=0; i<eigM.rows(); i++)
+                for(int j=0; j<eigM.cols(); j++)
+                    eigM(i,j) = cvM.at<float>(i,j);
+            break;
+        case CV_64F:
+            for(int i=0; i<eigM.rows(); i++)
+                for(int j=0; j<eigM.cols(); j++)
+                    eigM(i,j) = static_cast<float>(cvM.at<double>(i,j));
+            break;
+        default:
+            std::cout << "ERROR IN Cvmat2Eigmat" << std::endl;
+    }
+    return eigM;
+}
+
+cv::Mat Maths::Eigmat2Cvmat(Eigen::MatrixXf eigM)
+{
+    // TODO addapt to cv::Mat::type
+    cv::Mat cvM;
+    cvM = cv::Mat::zeros(eigM.rows(), eigM.cols(), CV_32F);
+    for(int i=0; i<eigM.rows(); i++)
+        for(int j=0; j<eigM.cols(); j++)
+            cvM.at<float>(i,j) = eigM(i,j);
+    return cvM.clone();
+}
